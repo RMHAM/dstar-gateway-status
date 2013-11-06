@@ -1,25 +1,30 @@
 #!/usr/bin/python
-# Hack by Joey Stanford <nv0n@arrl.net>
+"""Check Gateway Health."""
+# Joey Stanford <nv0n@arrl.net>
 
-import subprocess
-from time import ctime
-import httplib
-import string
 
+def readConfigFile(configfile):
+    config = ConfigParser.ConfigParser()
+    try:
+        config.read(configfile)
+    except:
+        print 'Config File Error:', err
+        exit(0)
+    return config
+
+
+def ping(ip):
+    ret = subprocess.call("ping -c 1 %s" % ip,
+                          shell=True,
+                          stdout=open('/dev/null', 'w'),
+                          stderr=subprocess.STDOUT)
+    return(ret)
 
 def main():
-    systems = {"W0DK": "Boulder",
-               "W0CDS": "Devil's Head",
-               "W0TLM": "Monument",
-               "XRF719": "XRF719 Reflector",
-               "WR0AEN": "Squaw Mountain",
-               "W0BFD": "Fort Collins",
-               "KD0LUX": "RT Systems Testbed",
-               "KC0CVU": "Colorado Springs",
-               "KD0QPG": "Salida",
-               "KD0RED": "Grand Junction",
-               "KC7SNO": "Cheyenne",
-               "NE7WY": "Gillette"}
+
+    systems = {}
+    for callsign, location in config.items("systems"):
+        systems[callsign.upper()] = location
 
     # HTML vars
     startline = "<TD BGCOLOR=#EEEEEE>"
@@ -27,8 +32,9 @@ def main():
     down = '<B><FONT COLOR="#CC0000">OFFLINE</FONT></B></TD>\n'
     broken = '<B><FONT COLOR="#FFA500">BROKEN</FONT></B></TD>\n'
     up = '<B><FONT COLOR="#00BB00">ONLINE</FONT></B></TD>\n'
-    details = '<a href="http://status.ircddb.net/qam.php? \
-              call=CALLSIGN">CALLSIGN</a>'
+    details = '<a href=\
+            "http://status.ircddb.net/qam.php?call=CALLSIGN"\
+            >CALLSIGN</a>'
 
     # determine our external ip
     conn = httplib.HTTPConnection("checkip.dyndns.org")
@@ -40,18 +46,18 @@ def main():
         print 'Error connecting to the server!! Check your internet connection'
         exit()
     conn.close()
-    startstr = string.find(data1, ': ')+2
+    startstr = string.find(data1, ': ') + 2
     endstr = string.find(data1, '</b')
     myip = data1[startstr:endstr]
 
-    subprocess.call(["rm", "gwys.txt"])
-    subprocess.call(["wget", "http://www.va3uv.com/gwys.txt"])
+    subprocess.call(["rm", config.get("files", "gwysfile")])
+    subprocess.call(["wget", config.get("files", "gwysdownload")])
 
-    gwys = open("gwys.txt", "r")
+    gwys = open(config.get("files", "gwysfile"), "r")
 
-    header = open("gwstatus.hdr", "r")
+    header = open(config.get("files", "header"), "r")
 
-    html = open("/usr/local/var/www/htdocs/index.html", "w")
+    html = open(config.get("files", "htmlout"), "w")
 
     # write out header
     for line in header.readlines():
@@ -66,9 +72,9 @@ def main():
     # write out body
     for line in gwys.readlines():
         if len(line.split()) == 3:
-            callsign, ip, port = line.split()
+            callsign, ip, _ = line.split()
         elif len(line.split()) == 2:
-            callsign, port = line.split()
+            callsign, _ = line.split()
             ip = "[blank]"
         else:
             continue
@@ -80,7 +86,7 @@ def main():
             html.write(startline)
             html.write(details.replace("CALLSIGN", callsign))
             html.write(endline)
-            # status
+            # web status
             html.write(startline)
             if ip == "[blank]":
                 html.write(broken)
@@ -97,6 +103,17 @@ def main():
                     html.write(down)
                 else:
                     html.write(broken.replace("BROKEN", res.status))
+            # ping status
+            html.write(startline)
+            if ip == "[blank]":
+                html.write(broken)
+            elif ip == myip:
+                html.write(broken.replace("BROKEN", "SELF"))
+            else:
+                if ping(ip) == 0:
+                    html.write(up)
+                else:
+                    html.write(down)
             # location
             html.write(startline)
             html.write(systems[callsign])
@@ -105,7 +122,31 @@ def main():
             html.write(startline)
             html.write(ip)
             html.write(endline)
-            # detailed status
+            # ircddb ddns
+            html.write(startline)
+            if callsign.startswith("XRF"):
+                # no ddns yet
+                ircddbip = "[blank]"
+                html.write("[N/A]")
+                html.write(endline)
+            else:
+                ircddbgw = callsign.lower() + ".gw.ircddb.net"
+                try:
+                    ircddbip = socket.gethostbyname(ircddbgw)
+                except socket.gaierror:
+                    ircddbip = "[blank]"
+                if ircddbip == "[blank]":
+                    html.write(down.replace("OFFLINE", "NOT CONFIGURED"))
+                elif ircddbip == ip:
+                    html.write(up)
+                else:
+                # exists and is different
+                    html.write(broken)
+            # ddns ip
+            html.write(startline)
+            html.write(ircddbip)
+            html.write(endline)
+            # detailed web status
             html.write(startline)
             if ip == "[blank]":
                 html.write("No IP Address")
@@ -122,4 +163,15 @@ def main():
     html.close()
 
 if __name__ == "__main__":
-        main()
+    import subprocess
+    from time import ctime
+    import httplib
+    import string
+    import ConfigParser
+    import socket
+
+    configfile = "gwstatus.ini"
+
+    config = readConfigFile(configfile)
+
+    main()
