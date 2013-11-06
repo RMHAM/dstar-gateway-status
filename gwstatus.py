@@ -27,8 +27,8 @@ def main():
     down = '<B><FONT COLOR="#CC0000">OFFLINE</FONT></B></TD>\n'
     broken = '<B><FONT COLOR="#FFA500">BROKEN</FONT></B></TD>\n'
     up = '<B><FONT COLOR="#00BB00">ONLINE</FONT></B></TD>\n'
-    details = '<a href="http://status.ircddb.net/qam.php?" \
-              "call=CALLSIGN">CALLSIGN</a>'
+    details = '<a href="http://status.ircddb.net/qam.php? \
+              call=CALLSIGN">CALLSIGN</a>'
 
     # determine our external ip
     conn = httplib.HTTPConnection("checkip.dyndns.org")
