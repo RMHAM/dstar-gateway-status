@@ -33,9 +33,9 @@ def main():
     down = '<B><FONT COLOR="#CC0000">OFFLINE</FONT></B></TD>\n'
     broken = '<B><FONT COLOR="#FFA500">BROKEN</FONT></B></TD>\n'
     up = '<B><FONT COLOR="#00BB00">ONLINE</FONT></B></TD>\n'
-    details = '<a href=\
-            "http://status.ircddb.net/qam.php?call=CALLSIGN"\
-            >CALLSIGN</a>'
+    details = ('<a href='
+               '"http://status.ircddb.net/qam.php?call=CALLSIGN"'
+               '>CALLSIGN</a>')
 
     # determine our external ip
     conn = httplib.HTTPConnection("checkip.dyndns.org")
@@ -91,7 +91,7 @@ def main():
             else:
                 html.write(details.replace("CALLSIGN", callsign))
             html.write(endline)
-            # web status
+            # dashboard status
             html.write(startline)
             if ip == "[blank]":
                 html.write(broken)
@@ -103,7 +103,8 @@ def main():
                 res = conn.getresponse()
                 conn.close()
                 if res.status == 200:
-                    html.write(up)
+                    linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
+                    html.write(up.replace("ONLINE", linked_ip))
                 elif res.status == 503:
                     html.write(down)
                 else:
