@@ -20,6 +20,7 @@ def ping(ip):
                           stderr=subprocess.STDOUT)
     return(ret)
 
+
 def main():
 
     systems = {}
@@ -84,7 +85,11 @@ def main():
             html.write("<TR>\n")
             # callsign
             html.write(startline)
-            html.write(details.replace("CALLSIGN", callsign))
+            if callsign.startswith("XRF"):
+                # XRF not handled by ircddb
+                html.write(callsign)
+            else:
+                html.write(details.replace("CALLSIGN", callsign))
             html.write(endline)
             # web status
             html.write(startline)
