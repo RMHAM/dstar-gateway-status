@@ -142,7 +142,7 @@ def main():
                 except socket.gaierror:
                     ircddbip = "[blank]"
                 if ircddbip == "[blank]":
-                    html.write(down.replace("OFFLINE", "NOT CONFIGURED"))
+                    html.write(down.replace("OFFLINE", "NOT FOUND"))
                 elif ircddbip == ip:
                     html.write(up)
                 else:
