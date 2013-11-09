@@ -23,9 +23,16 @@ def ping(ip):
 
 def main():
 
+    # load up the systems we want to interrogate
     systems = {}
     for callsign, location in config.items("systems"):
         systems[callsign.upper()] = location
+
+    # we need to cover the case where a system we care about doesn't
+    # exist yet in the gateway file. We'll do this via sets.
+    # set(systems) only adds the key (callsign)
+    systems_set = set(systems)
+    processed_set = set()
 
     # HTML vars
     startline = "<TD BGCOLOR=#EEEEEE>"
@@ -81,6 +88,7 @@ def main():
             continue
         if callsign in systems:
             print callsign
+            processed_set.add(callsign)
             # start
             html.write("<TR>\n")
             # callsign
@@ -158,6 +166,27 @@ def main():
                 html.write("No IP Address")
             else:
                 html.write(res.reason)
+            html.write(endline)
+
+    # let's check to see if any where not in the gwy file
+    unprocessed = systems_set - processed_set
+    if len(unprocessed) > 0:
+        html.write("</TABLE>\n\n")
+        html.write("<P>Hosts Not Found</P>")
+        html.write("<TABLE BORDER CELLPADDING=5>")
+        html.write("<TR VALIGN=top>")
+        html.write("<TD BGCOLOR=#EEEEEE><B>Host</B></TD>")
+        html.write("<TD BGCOLOR=#EEEEEE><B>Location</B></TD>")
+        html.write("</TR>")
+        for item in unprocessed:
+            print item
+            # callsign
+            html.write(startline)
+            html.write(broken.replace("BROKEN", item))
+            html.write(endline)
+            # location
+            html.write(startline)
+            html.write(systems[item])
             html.write(endline)
 
     # finish up
