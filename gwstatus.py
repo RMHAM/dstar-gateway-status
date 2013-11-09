@@ -21,6 +21,21 @@ def ping(ip):
     return(ret)
 
 
+def get_IP():
+    # determine our external ip
+    ip_regex = '([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
+    conn = httplib.HTTPConnection("checkip.dyndns.org")
+    conn.request("GET", "")
+    res = conn.getresponse()
+    if res.status == 200:
+        ip = re.split(ip_regex, res.read())[1]
+    else:
+        print 'Error connecting to the server!! Check your internet connection'
+        exit()
+    conn.close()
+    return ip
+
+
 def main():
 
     # load up the systems we want to interrogate
@@ -44,19 +59,7 @@ def main():
                '"http://status.ircddb.net/qam.php?call=CALLSIGN"'
                '>CALLSIGN</a>')
 
-    # determine our external ip
-    conn = httplib.HTTPConnection("checkip.dyndns.org")
-    conn.request("GET", "/index.html")
-    res = conn.getresponse()
-    if res.status == 200:
-        data1 = res.read()
-    else:
-        print 'Error connecting to the server!! Check your internet connection'
-        exit()
-    conn.close()
-    startstr = string.find(data1, ': ') + 2
-    endstr = string.find(data1, '</b')
-    myip = data1[startstr:endstr]
+    myip = get_IP()
 
     subprocess.call(["rm", config.get("files", "gwysfile")])
     subprocess.call(["wget", config.get("files", "gwysdownload")])
@@ -201,7 +204,7 @@ if __name__ == "__main__":
     import subprocess
     from time import ctime
     import httplib
-    import string
+    import re
     import ConfigParser
     import socket
 
