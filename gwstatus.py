@@ -175,14 +175,15 @@ def main():
     unprocessed = systems_set - processed_set
     if len(unprocessed) > 0:
         html.write("</TABLE>\n\n")
-        html.write("<P>Hosts Not Found</P>")
+        html.write("<P>Hosts Not Found</P>\n")
         html.write("<TABLE BORDER CELLPADDING=5>")
         html.write("<TR VALIGN=top>")
         html.write("<TD BGCOLOR=#EEEEEE><B>Host</B></TD>")
         html.write("<TD BGCOLOR=#EEEEEE><B>Location</B></TD>")
-        html.write("</TR>")
+        html.write("</TR>\n")
         for item in unprocessed:
             print item
+            html.write("<TR>\n")
             # callsign
             html.write(startline)
             html.write(broken.replace("BROKEN", item))
