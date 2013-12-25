@@ -120,10 +120,10 @@ def main():
                 if res.status == 200:
                     linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
                     html.write(up.replace("ONLINE", linked_ip))
-                elif res.status == 503:
+                elif (res.status == 503 or res.status == 408):
                     html.write(down)
                 else:
-                    html.write(broken.replace("BROKEN", "OFFLINE"))
+                    html.write(broken.replace("BROKEN", res.reason))
             # ping status
             html.write(startline)
             if ip == "[blank]":
