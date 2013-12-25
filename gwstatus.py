@@ -115,7 +115,7 @@ def main():
                     res = conn.getresponse()
                     conn.close()
                 except socket.error, e:
-                    res.status = "408"
+                    res.status = 408
                     res.reason = httplib.responses[408]
                 if res.status == 200:
                     linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
