@@ -109,17 +109,21 @@ def main():
             elif ip == myip:
                 html.write(broken.replace("BROKEN", "SELF"))
             else:
-                conn = httplib.HTTPConnection(ip)
-                conn.request("HEAD", "/")
-                res = conn.getresponse()
-                conn.close()
+                try:
+                    conn = httplib.HTTPConnection(ip)
+                    conn.request("HEAD", "/")
+                    res = conn.getresponse()
+                    conn.close()
+                except socket.error, e:
+                    res.status = "408"
+                    res.reason = httplib.responses[408]
                 if res.status == 200:
                     linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
                     html.write(up.replace("ONLINE", linked_ip))
                 elif res.status == 503:
                     html.write(down)
                 else:
-                    html.write(broken.replace("BROKEN", res.status))
+                    html.write(broken.replace("BROKEN", "OFFLINE"))
             # ping status
             html.write(startline)
             if ip == "[blank]":
