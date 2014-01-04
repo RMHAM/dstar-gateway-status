@@ -180,7 +180,7 @@ def main():
                 html.write(endline)
             else:
                 if ircddbip == "[blank]":
-                    html.write(down.replace("OFFLINE", "NOT FOUND"))
+                    html.write(down)
                 # exists and matches gwys.txt
                 # or exists but gwys.txt is broken
                 elif (ircddbip == ip or ip == "[blank]"):
@@ -191,7 +191,7 @@ def main():
             # ddns ip
             html.write(startline)
             if ircddbip == "[blank]":
-                html.write(broken)
+                html.write(down.replace("OFFLINE", "NOT FOUND"))
             else:
                 html.write(ircddbip)
             html.write(endline)
