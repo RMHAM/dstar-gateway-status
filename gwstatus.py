@@ -82,6 +82,7 @@ def main():
 
     # write out body
     for line in gwys.readlines():
+        # retrieve gwys information
         if len(line.split()) == 3:
             callsign, ip, _ = line.split()
         elif len(line.split()) == 2:
@@ -92,7 +93,17 @@ def main():
         if callsign in systems:
             print callsign
             processed_set.add(callsign)
-            # start
+            # Let's get the ircddb status next.
+            if callsign.startswith("XRF"):
+                # no ddns yet
+                ircddbip = "[blank]"
+            else:
+                ircddbgw = callsign.lower() + ".gw.ircddb.net"
+                try:
+                    ircddbip = socket.gethostbyname(ircddbgw)
+                except socket.gaierror:
+                    ircddbip = "[blank]"
+            # start of html file
             html.write("<TR>\n")
             # callsign
             html.write(startline)
@@ -104,13 +115,16 @@ def main():
             html.write(endline)
             # dashboard status
             html.write(startline)
-            if ip == "[blank]":
-                html.write(broken)
-            elif ip == myip:
+            if ip == myip:
                 html.write(broken.replace("BROKEN", "SELF"))
+            elif (ip == "[blank]" and ircddbip == "[blank]"):
+                html.write(down)
             else:
                 try:
-                    conn = httplib.HTTPConnection(ip)
+                    if ip == "blank":
+                        conn = httplib.HTTPConnection(ircddbip)
+                    else:
+                        conn = httplib.HTTPConnection(ip)
                     conn.request("HEAD", "/")
                     res = conn.getresponse()
                     conn.close()
@@ -126,12 +140,17 @@ def main():
                     html.write(broken.replace("BROKEN", res.reason))
             # ping status
             html.write(startline)
-            if ip == "[blank]":
+            if (ip == "[blank]" and ircddbip == "[blank]"):
                 html.write(broken)
             elif ip == myip:
                 html.write(broken.replace("BROKEN", "SELF"))
             else:
-                if ping(ip) == 0:
+                if ip == "[blank]":
+                    if ping(ircddbip) == 0:
+                        html.write(up)
+                    else:
+                        html.write(down)
+                elif ping(ip) == 0:
                     html.write(up)
                 else:
                     html.write(down)
@@ -141,21 +160,18 @@ def main():
             html.write(endline)
             # IP
             html.write(startline)
-            html.write(ip)
+            if ip == "[blank]":
+                html.write(broken)
+            else:
+                html.write(ip)
             html.write(endline)
             # ircddb ddns
             html.write(startline)
             if callsign.startswith("XRF"):
                 # no ddns yet
-                ircddbip = "[blank]"
                 html.write("[N/A]")
                 html.write(endline)
             else:
-                ircddbgw = callsign.lower() + ".gw.ircddb.net"
-                try:
-                    ircddbip = socket.gethostbyname(ircddbgw)
-                except socket.gaierror:
-                    ircddbip = "[blank]"
                 if ircddbip == "[blank]":
                     html.write(down.replace("OFFLINE", "NOT FOUND"))
                 # exists and matches gwys.txt
