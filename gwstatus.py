@@ -158,7 +158,9 @@ def main():
                     ircddbip = "[blank]"
                 if ircddbip == "[blank]":
                     html.write(down.replace("OFFLINE", "NOT FOUND"))
-                elif ircddbip == ip:
+                # exists and matches gwys.txt
+                # or exists but gwys.txt is broken
+                elif (ircddbip == ip or ircddbip == "[blank]"):
                     html.write(up)
                 else:
                 # exists and is different

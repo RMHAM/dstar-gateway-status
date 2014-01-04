@@ -5,7 +5,7 @@
 </HEAD>
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF">
 
-<P><B>Colorado/Wyoming D-STAR Network Health Report</B></P>
+<P><B>Colorado/Wyoming <a href="http://www.va3uv.com/freestar.htm">FREE STAR*</a> Network Health Report</B></P>
 <SMALL>Contact: Joey Stanford, NV0N (at arrl.net), Code: <a href="https://github.com/rinchen/dstar-gateway-status">GitHub Repository</a></SMALL><BR>
 
 <TABLE BORDER CELLPADDING=5>
