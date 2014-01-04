@@ -135,7 +135,11 @@ def main():
                     resstatus = res.status
                     resreason = res.reason
                 if resstatus == 200:
-                    linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
+                    if ip == "[blank]":
+                        linked_ip = \
+                            '<a href="http://' + ircddbip + '">ONLINE</a>'
+                    else:
+                        linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
                     html.write(up.replace("ONLINE", linked_ip))
                 elif (resstatus == 503 or resstatus == 408):
                     html.write(down)
