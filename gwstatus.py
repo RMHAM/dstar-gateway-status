@@ -144,7 +144,6 @@ def main():
             # ping status
             html.write(startline)
             if (ip == "[blank]" and ircddbip == "[blank]"):
-                html.write(broken)
                 html.write(down)
             elif ip == myip:
                 html.write(broken.replace("BROKEN", "SELF"))
@@ -187,7 +186,6 @@ def main():
                     html.write(broken)
             # ddns ip
             html.write(startline)
-            html.write(ircddbip)
             if ircddbip == "[blank]":
                 html.write(broken)
             else:
