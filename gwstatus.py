@@ -188,6 +188,10 @@ def main():
             # ddns ip
             html.write(startline)
             html.write(ircddbip)
+            if ircddbip == "[blank]":
+                html.write(broken)
+            else:
+                html.write(ircddbip)
             html.write(endline)
             # detailed web status
             html.write(startline)
