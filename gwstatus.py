@@ -191,7 +191,7 @@ def main():
             # ddns ip
             html.write(startline)
             if ircddbip == "[blank]":
-                html.write(down.replace("OFFLINE", "NOT FOUND"))
+                html.write(broken.replace("BROKEN", "NOT FOUND"))
             else:
                 html.write(ircddbip)
             html.write(endline)
