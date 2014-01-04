@@ -145,6 +145,7 @@ def main():
             html.write(startline)
             if (ip == "[blank]" and ircddbip == "[blank]"):
                 html.write(broken)
+                html.write(down)
             elif ip == myip:
                 html.write(broken.replace("BROKEN", "SELF"))
             else:
