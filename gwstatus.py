@@ -122,6 +122,7 @@ def main():
             else:
                 try:
                     if ip == "blank":
+                    if ip == "[blank]":
                         conn = httplib.HTTPConnection(ircddbip)
                     else:
                         conn = httplib.HTTPConnection(ip)
