@@ -121,7 +121,6 @@ def main():
                 html.write(down)
             else:
                 try:
-                    if ip == "blank":
                     if ip == "[blank]":
                         conn = httplib.HTTPConnection(ircddbip)
                     else:
@@ -130,15 +129,18 @@ def main():
                     res = conn.getresponse()
                     conn.close()
                 except socket.error, e:
-                    res.status = 408
-                    res.reason = httplib.responses[408]
-                if res.status == 200:
+                    resstatus = 408
+                    resreason = httplib.responses[408]
+                else:
+                    resstatus = res.status
+                    resreason = res.reason
+                if resstatus == 200:
                     linked_ip = '<a href="http://' + ip + '">ONLINE</a>'
                     html.write(up.replace("ONLINE", linked_ip))
-                elif (res.status == 503 or res.status == 408):
+                elif (resstatus == 503 or resstatus == 408):
                     html.write(down)
                 else:
-                    html.write(broken.replace("BROKEN", res.reason))
+                    html.write(broken.replace("BROKEN", resreason))
             # ping status
             html.write(startline)
             if (ip == "[blank]" and ircddbip == "[blank]"):
@@ -191,7 +193,7 @@ def main():
             if ip == "[blank]":
                 html.write("No IP Address")
             else:
-                html.write(res.reason)
+                html.write(resreason)
             html.write(endline)
 
     # let's check to see if any where not in the gwy file
