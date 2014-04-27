@@ -9,7 +9,7 @@ def readConfigFile(configfile):
         config.read(configfile)
     except:
         print 'Config File Error:', err
-        exit(0)
+        exit(1)
     return config
 
 
