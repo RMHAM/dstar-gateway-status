@@ -131,6 +131,9 @@ def main():
                 except socket.error, e:
                     resstatus = 408
                     resreason = httplib.responses[408]
+                except httplib.BadStatusLine:
+                    resstatus = 204
+                    resreason = httplib.responses[204]
                 else:
                     resstatus = res.status
                     resreason = res.reason
