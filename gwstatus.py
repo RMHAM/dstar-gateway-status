@@ -24,7 +24,7 @@ def ping(ip):
 def get_IP():
     # determine our external ip
     ip_regex = '([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
-    conn = httplib.HTTPConnection("checkip.dyndns.org")
+    conn = httplib.HTTPConnection("checkip.dyndns.org", timeout=30)
     conn.request("GET", "")
     res = conn.getresponse()
     if res.status == 200:
@@ -122,9 +122,10 @@ def main():
             else:
                 try:
                     if ip == "[blank]":
-                        conn = httplib.HTTPConnection(ircddbip)
+                        conn = httplib.HTTPConnection(ircddbip,
+                                                      timeout=30)
                     else:
-                        conn = httplib.HTTPConnection(ip)
+                        conn = httplib.HTTPConnection(ip, timeout=30)
                     conn.request("HEAD", "/")
                     res = conn.getresponse()
                     conn.close()
