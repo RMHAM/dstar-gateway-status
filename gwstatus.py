@@ -81,6 +81,8 @@ def main():
     html.write("\n")
 
     # write out body
+    # XXX:2014-11-23 Joey - I really need to break this section into
+    # modules at some point.
     for line in gwys.readlines():
         # retrieve gwys information
         if len(line.split()) == 3:
@@ -173,31 +175,24 @@ def main():
             html.write(startline)
             if ip == "[blank]":
                 html.write(broken)
+            elif (not callsign.startswith("XRF")
+                    and ip == ircddbip):
+                    html.write(up.replace("ONLINE", ip))
             else:
-                html.write(ip)
+                html.write(broken.replace("BROKEN", ip))
             html.write(endline)
-            # ircddb ddns
+            # ddns ip
             html.write(startline)
             if callsign.startswith("XRF"):
                 # no ddns yet
                 html.write("[N/A]")
-                html.write(endline)
             else:
                 if ircddbip == "[blank]":
                     html.write(down)
-                # exists and matches gwys.txt
-                # or exists but gwys.txt is broken
-                elif (ircddbip == ip or ip == "[blank]"):
-                    html.write(up)
+                elif ircddbip == ip:
+                    html.write(up.replace("ONLINE", ircddbip))
                 else:
-                # exists and is different
-                    html.write(broken)
-            # ddns ip
-            html.write(startline)
-            if ircddbip == "[blank]":
-                html.write(broken.replace("BROKEN", "NOT FOUND"))
-            else:
-                html.write(ircddbip)
+                    html.write(broken.replace("BROKEN", ircddbip))
             html.write(endline)
             # detailed web status
             html.write(startline)

@@ -1,0 +1,2 @@
+ * modularize main in gwstatus.py
+ * aggregate all the HTML items into one place, not split between .hdr and the .py
