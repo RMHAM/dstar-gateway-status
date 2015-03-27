@@ -144,7 +144,7 @@ def check_pingable(systems, myip):
         elif ping(systems[repeater].ip) == 0:
             systems[repeater].pingable = "ONLINE"
         else:
-            systems[repeater].pingable = "BROKEN"
+            systems[repeater].pingable = "OFFLINE"
 
 
 def generate_html(systems):
@@ -214,15 +214,16 @@ def generate_html(systems):
             html.write(broken.replace("BROKEN", systems[repeater].web_status))
         # ping status
         html.write(startline)
-        if (systems[repeater].ip == "" and systems[repeater].ircddbip == ""):
+        if systems[repeater].pingable == "OFFLINE":
             html.write(down)
-        elif systems[repeater].dashboard == "SELF":
+        elif systems[repeater].pingable == "BROKEN":
+            html.write(broken)
+        elif systems[repeater].pingable == "SELF":
             html.write(broken.replace("BROKEN", "SELF"))
+        elif systems[repeater].pingable == "ONLINE":
+            html.write(up)
         else:
-            if systems[repeater].pingable:
-                html.write(up)
-            else:
-                html.write(down)
+            html.write(broken)
 
         # location
         html.write(startline)
