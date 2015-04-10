@@ -2,6 +2,23 @@
 """Check Gateway Health."""
 # Joey Stanford <nv0n@arrl.net>
 
+from Queue import Queue
+from threading import Thread
+
+
+class NetWorker(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            # Get the work from the queue and expand the tuple
+            systems, repeater, myip = self.queue.get()
+            check_single_dashboard(systems, repeater, myip)
+            check_pingable(systems, repeater, myip)
+            self.queue.task_done()
+
 
 class Repeater(object):
     """Repeater Details Object"""
@@ -80,71 +97,69 @@ def process_gwys_file(gwys, systems):
                     systems[callsign].ircddbip = ""
 
 
-def check_dashboards(systems, myip):
+def check_single_dashboard(systems, repeater, myip):
     """check the dashboard of each repeater"""
 
-    for repeater in systems:
-            if systems[repeater].ip == myip:
-                systems[repeater].dashboard = "SELF"
-                systems[repeater].web_status = "N/A"
-            elif (systems[repeater].ip == "" and
-                  systems[repeater].ircddbip == ""):
-                systems[repeater].dashboard = "OFFLINE"
-                systems[repeater].web_status = "No IP Addresss"
+    if systems[repeater].ip == myip:
+        systems[repeater].dashboard = "SELF"
+        systems[repeater].web_status = "N/A"
+    elif (systems[repeater].ip == "" and
+            systems[repeater].ircddbip == ""):
+        systems[repeater].dashboard = "OFFLINE"
+        systems[repeater].web_status = "No IP Addresss"
+    else:
+        # let's see if we can connect using one of the IPs
+        try:
+            if systems[repeater].ip == "":
+                conn = httplib.HTTPConnection(
+                    systems[repeater].ircddbip,
+                    timeout=30)
             else:
-                # let's see if we can connect using one of the IPs
-                try:
-                    if systems[repeater].ip == "":
-                        conn = httplib.HTTPConnection(
-                            systems[repeater].ircddbip,
-                            timeout=30)
-                    else:
-                        conn = httplib.HTTPConnection(
-                            systems[repeater].ip,
-                            timeout=30)
-                    conn.request("HEAD", "/")
-                    res = conn.getresponse()
-                    conn.close()
-                except socket.error, e:
-                    resstatus = 408
-                    resreason = httplib.responses[408]
-                except httplib.BadStatusLine:
-                    resstatus = 204
-                    resreason = httplib.responses[204]
-                else:
-                    resstatus = res.status
-                    resreason = res.reason
+                conn = httplib.HTTPConnection(
+                    systems[repeater].ip,
+                    timeout=30)
+            conn.request("HEAD", "/")
+            res = conn.getresponse()
+            conn.close()
+        except socket.error, e:
+            resstatus = 408
+            resreason = httplib.responses[408]
+        except httplib.BadStatusLine:
+            resstatus = 204
+            resreason = httplib.responses[204]
+        else:
+            resstatus = res.status
+            resreason = res.reason
 
-                # Let's interpret the results
-                if resstatus == 200:
-                    systems[repeater].dashboard = "ONLINE"
-                elif (resstatus == 503 or resstatus == 408):
-                    systems[repeater].dashboard = "OFFLINE"
-                else:
-                    # Broken systems e.g. "No Content"
-                    systems[repeater].dashboard = resreason
+        # Let's interpret the results
+        if resstatus == 200:
+            systems[repeater].dashboard = "ONLINE"
+        elif (resstatus == 503 or resstatus == 408):
+            systems[repeater].dashboard = "OFFLINE"
+        else:
+            # Broken systems e.g. "No Content"
+            systems[repeater].dashboard = resreason
 
-                # set the web status as our parting gift
-                systems[repeater].web_status = resreason
+        # set the web status as our parting gift
+        systems[repeater].web_status = resreason
 
 
-def check_pingable(systems, myip):
+def check_pingable(systems, repeater, myip):
     """Can we even reach the system?"""
 
-    for repeater in systems:
-        if (systems[repeater].ip == "" and systems[repeater].ircddbip == ""):
-            systems[repeater].pingable = "BROKEN"
-        elif systems[repeater].ip == myip:
-            systems[repeater].pingable = "SELF"
-        elif (systems[repeater].ip == "" and systems[repeater].ircddbip != ""):
-                if ping(systems[repeater].ircddbip) == 0:
-                    systems[repeater].pingable = "ONLINE"
-                else:
-                    systems[repeater].pingable = "OFFLINE"
-        elif ping(systems[repeater].ip) == 0:
-            systems[repeater].pingable = "ONLINE"
-        else:
-            systems[repeater].pingable = "OFFLINE"
+    if (systems[repeater].ip == "" and systems[repeater].ircddbip == ""):
+        systems[repeater].pingable = "BROKEN"
+    elif systems[repeater].ip == myip:
+        systems[repeater].pingable = "SELF"
+    elif (systems[repeater].ip == "" and systems[repeater].ircddbip != ""):
+            if ping(systems[repeater].ircddbip) == 0:
+                systems[repeater].pingable = "ONLINE"
+            else:
+                systems[repeater].pingable = "OFFLINE"
+    elif ping(systems[repeater].ip) == 0:
+        systems[repeater].pingable = "ONLINE"
+    else:
+        systems[repeater].pingable = "OFFLINE"
 
 
 def generate_html(systems):
@@ -292,9 +307,27 @@ def main():
     process_gwys_file(gwys, systems)
     gwys.close()
 
+    # Net operations take time so we're going to have each repeater
+    # have it's own worker thread to speed up the process
+    # Create a queue to communicate with the worker threads
+    queue = Queue()
+
+    # Create 1 worker thread for each repeater
+    ip_num = len(systems)
+    for x in range(ip_num):
+        worker = NetWorker(queue)
+        # Setting daemon to True will let the main thread exit even
+        # though the workers are blocking
+        worker.daemon = True
+        worker.start()
     # determine systems[repeater].status
-    check_dashboards(systems, myip)
-    check_pingable(systems, myip)
+    for repeater in systems:
+        # Put the tasks into the queue as a tuple
+        queue.put((systems, repeater, myip))
+
+    # Causes the main thread to wait for the queue to finish
+    # processing all the tasks
+    queue.join()
 
     # write out html
     generate_html(systems)
