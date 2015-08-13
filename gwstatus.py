@@ -15,6 +15,7 @@ class NetWorker(Thread):
         while True:
             # Get the work from the queue and expand the tuple
             systems, repeater, myip = self.queue.get()
+            check_ircddb(systems, repeater)
             check_single_dashboard(systems, repeater, myip)
             check_pingable(systems, repeater, myip)
             self.queue.task_done()
@@ -79,22 +80,25 @@ def process_gwys_file(gwys, systems):
             callsign, _ = line.split()
             ip = ""
         else:
+            print "Bad gwys.txt line: %s" % (line)
             continue
 
         callsign = callsign.upper()
         if callsign in systems:
             systems[callsign].in_gwys_file = True
             systems[callsign].ip = ip
-            # Let's get the ircddb status next.
-            if callsign.startswith("XRF"):
-                # no ddns yet
-                systems[callsign].ircddbip = ""
-            else:
-                ircddbgw = callsign.lower() + ".gw.ircddb.net"
-                try:
-                    systems[callsign].ircddbip = socket.gethostbyname(ircddbgw)
-                except socket.gaierror:
-                    systems[callsign].ircddbip = ""
+
+def check_ircddb(systems, repeater):
+    """check ircddb status"""
+    if repeater.startswith("XRF"):
+        # no ddns yet
+        systems[repeater].ircddbip = ""
+    else:
+        ircddbgw = repeater.lower() + ".gw.ircddb.net"
+        try:
+            systems[repeater].ircddbip = socket.gethostbyname(ircddbgw)
+        except socket.gaierror:
+            systems[repeater].ircddbip = ""
 
 
 def check_single_dashboard(systems, repeater, myip):
