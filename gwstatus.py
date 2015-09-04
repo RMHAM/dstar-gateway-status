@@ -127,13 +127,10 @@ def check_single_dashboard(systems, repeater, myip):
             conn.close()
         except socket.error, e:
             resstatus = 408
-            resreason = httplib.responses[408]
         except httplib.BadStatusLine:
             resstatus = 204
-            resreason = httplib.responses[204]
         else:
             resstatus = res.status
-            resreason = res.reason
 
         # Let's interpret the results
         if resstatus == 200:
@@ -142,10 +139,10 @@ def check_single_dashboard(systems, repeater, myip):
             systems[repeater].dashboard = "OFFLINE"
         else:
             # Broken systems e.g. "No Content"
-            systems[repeater].dashboard = resreason
+            systems[repeater].dashboard = httplib.responses[resstatus]
 
         # set the web status as our parting gift
-        systems[repeater].web_status = resreason
+        systems[repeater].web_status = str(resstatus)
 
 
 def check_pingable(systems, repeater, myip):
@@ -230,7 +227,7 @@ def generate_html(systems):
                     '">ONLINE</a>'
             html.write(up.replace("ONLINE", linked_ip))
         else:
-            html.write(broken.replace("BROKEN", systems[repeater].web_status))
+            html.write(broken.replace("BROKEN", systems[repeater].dashboard))
         # ping status
         html.write(startline)
         if systems[repeater].pingable == "OFFLINE":
@@ -280,7 +277,8 @@ def generate_html(systems):
 
         # detailed web status
         html.write(startline)
-        html.write(systems[repeater].web_status)
+        html.write(("<a href='https://http.cat/" + systems[repeater].web_status + "'>"
+                    + systems[repeater].web_status + "</a>"))
         html.write(endline)
 
     # finish up
