@@ -8,6 +8,8 @@ It will not support repeaters on other systems such as ICOM's G2 software but it
 Some sites using this script:
  * http://dstar.nv0n.net
 
+![Example Screenshot](https://github.com/RMHAM/dstar-gateway-status/blob/master/screenshot.png)
+
 Requirements
 ============
 
