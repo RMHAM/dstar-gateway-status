@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# CENTOS 5.x users use #!/usr/bin/python26
 """Check Gateway Health."""
 # Joey Stanford <nv0n@arrl.net>
 
