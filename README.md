@@ -7,13 +7,13 @@ This is a quick and dirty FREE STAR* (D-STAR) health and status script which gen
 
 It will not support repeaters on other systems such as ICOM's G2 software running DPLUS. It may be useful for repeaters that utilize ircDDB but are not fully FREE STAR* compliant.
 
-Some sites using this script:
- * http://dstar.nv0n.net
- * https://wb1gof.dstargateway.org/gwstatus.html
-
 Example
 =======
 ![Example Screenshot](https://github.com/RMHAM/dstar-gateway-status/blob/master/screenshot.png)
+
+Some sites using this script:
+ * http://dstar.nv0n.net
+ * https://wb1gof.dstargateway.org/gwstatus.html
 
 Requirements
 ============
