@@ -292,6 +292,7 @@ def generate_html(systems):
 
 
 def main():
+    """Main Function"""
 
     # load up the systems we want to interrogate
     systems = {}
