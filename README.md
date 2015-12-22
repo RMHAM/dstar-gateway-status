@@ -11,14 +11,14 @@ Some sites using this script:
 Requirements
 ============
 
--	Python 2.6 or higher (but not Python 3)
--	python-httplib2
+ * Python 2.6 or higher (but not Python 3)
+ * python-httplib2
 
 Installation
 ============
 
--	Debian/Ubuntu
-	-	sudo apt-get install python-httplib2
--	CentOS 5.x
-	-	sudo yum install python26 python26-httplib2
-	-	edit gwstatus.py and change the first line from "python" to "python26" as shown in the comment.
+ * Debian/Ubuntu
+  1. `sudo apt-get install python-httplib2`
+ * CentOS 5.x
+  1. `sudo yum install python26 python26-httplib2`
+  2. edit gwstatus.py and change the first line from "python" to "python26" as shown in the comment.
