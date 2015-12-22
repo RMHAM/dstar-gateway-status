@@ -9,6 +9,7 @@ It will not support repeaters on other systems such as ICOM's G2 software but it
 
 Some sites using this script:
  * http://dstar.nv0n.net
+ * https://wb1gof.dstargateway.org/gwstatus.html
 
 Example
 =======
@@ -20,8 +21,8 @@ Requirements
  * Python 2.6 or higher (but not Python 3)
  * python-httplib2
 
-Installation
-============
+Prerequisites
+=============
 
  * Debian/Ubuntu
   1. `sudo apt-get install python-httplib2`
@@ -29,6 +30,14 @@ Installation
   1. `sudo yum install python26 python26-httplib2`
   2. edit gwstatus.py and change the first line from "python" to "python26" as shown in the comment.
 
+Configuration
+=============
+Edit gwstatus.ini:
+ * set list of repeaters and reflectors you wish to monitor
+ * set the destination location (`htmlout`) of the resulting html file.
+
 Execution
 =========
 This script was designed to be run nightly from cron. For example: `@daily /home/joey/gwstatus.py > /home/joey/gwstatus.log`
+
+This script does not need root so long as the user executing the script has priviledges to write to the directory you specified in gwstatus.ini.
