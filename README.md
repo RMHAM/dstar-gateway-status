@@ -1,11 +1,11 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ba02492aeb5041229b85085fdd049e51/badge.svg)](https://www.quantifiedcode.com/app/project/ba02492aeb5041229b85085fdd049e51)
 
-dstar-gateway-status
-====================
+Description
+===========
 
-This is a quick and dirty FREE STAR* (D-STAR) health script intended to be called by crontab. It reads in a predefined list of systems (gateways and XRF reflectors) and performs a lookup on various data elements. It's designed to support both full and hybrid [FREE STAR\*](http://va3uv.com/freestar.htm) + [ircDDB](http://ircddb.net) systems.
+This is a quick and dirty FREE STAR* (D-STAR) health and status script which generates an HTML page. It reads in a predefined list of systems (gateways and XRF reflectors) and performs a lookup on various data elements. It's designed to support both full and hybrid [FREE STAR\*](http://va3uv.com/freestar.htm) + [ircDDB](http://ircddb.net) systems.
 
-It will not support repeaters on other systems such as ICOM's G2 software but it will work on FREE STAR* hybrid G2 systems.
+It will not support repeaters on other systems such as ICOM's G2 software running DPLUS. It may be useful for repeaters that utilize ircDDB but are not fully FREE STAR* compliant.
 
 Some sites using this script:
  * http://dstar.nv0n.net
@@ -34,7 +34,7 @@ Configuration
 =============
 Edit gwstatus.ini:
  * set list of repeaters and reflectors you wish to monitor
- * set the destination location (`htmlout`) of the resulting html file.
+ * set the destination location (`htmlout`) of the resulting html file
 
 Execution
 =========
