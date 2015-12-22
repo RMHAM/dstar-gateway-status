@@ -35,6 +35,7 @@ Configuration
 Edit gwstatus.ini:
  * set list of repeaters and reflectors you wish to monitor
  * set the destination location (`htmlout`) of the resulting html file
+ * customize `gwstatus.hdr` to meet your needs
 
 Execution
 =========
