@@ -9,4 +9,5 @@ Patches are welcome!
 3. Fork the repository on GitHub
 4. Make your changes.
 5. Please make sure all python programs pass pep8.
-6. Push to your fork and submit a pull request.
+6. Please make sure the default systems listed in gwstatus.ini work as expected.
+7. Push to your fork and submit a pull request.
