@@ -5,7 +5,8 @@ This is a quick and dirty FREE STAR* (D-STAR) health script intended to be calle
 
 It will not support repeaters on other systems such as ICOM's G2 software but it will work on FREE STAR* hybrid G2 systems.
 
-Some sites using this script: * http://dstar.nv0n.net
+Some sites using this script:
+ * http://dstar.nv0n.net
 
 Requirements
 ============
