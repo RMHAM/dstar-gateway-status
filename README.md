@@ -28,3 +28,7 @@ Installation
  * CentOS 5.x
   1. `sudo yum install python26 python26-httplib2`
   2. edit gwstatus.py and change the first line from "python" to "python26" as shown in the comment.
+
+Execution
+=========
+This script was designed to be run nightly from cron. For example: `@daily /home/joey/gwstatus.py > /home/joey/gwstatus.log`
