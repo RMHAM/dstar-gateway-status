@@ -8,11 +8,13 @@ from threading import Thread
 
 
 class NetWorker(Thread):
+    """Defines the Worker which does all the work"""
     def __init__(self, queue):
         Thread.__init__(self)
         self.queue = queue
 
     def run(self):
+        """Let's run the worker"""
         while True:
             # Get the work from the queue and expand the tuple
             systems, repeater, myip = self.queue.get()
@@ -36,12 +38,12 @@ class Repeater(object):
         self.in_gwys_file = False
 
 
-def readConfigFile(configfile):
+def readconfigfile(configfile):
     """setup the config file"""
     config = ConfigParser.ConfigParser()
     try:
         config.read(configfile)
-    except:
+    except ConfigParser.Error, err:
         print 'Config File Error:', err
         exit(1)
     return config
@@ -56,7 +58,7 @@ def ping(ip):
     return(ret)
 
 
-def get_IP():
+def get_ip():
     """determine our external ip"""
     ip_regex = '([\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3})'
     conn = httplib.HTTPConnection("checkip.dyndns.org", timeout=30)
@@ -88,6 +90,7 @@ def process_gwys_file(gwys, systems):
         if callsign in systems:
             systems[callsign].in_gwys_file = True
             systems[callsign].ip = ip
+
 
 def check_ircddb(systems, repeater):
     """check ircddb status"""
@@ -126,7 +129,7 @@ def check_single_dashboard(systems, repeater, myip):
             conn.request("HEAD", "/")
             res = conn.getresponse()
             conn.close()
-        except socket.error, e:
+        except socket.error:
             resstatus = 408
         except httplib.BadStatusLine:
             resstatus = 204
@@ -136,7 +139,7 @@ def check_single_dashboard(systems, repeater, myip):
         # Let's interpret the results
         if resstatus == 200:
             systems[repeater].dashboard = "ONLINE"
-        elif (resstatus == 503 or resstatus == 408):
+        elif (resstatus in [503, 408]):
             systems[repeater].dashboard = "OFFLINE"
         else:
             # Broken systems e.g. "No Content"
@@ -180,113 +183,112 @@ def generate_html(systems):
                '"http://status.ircddb.net/qam.php?call=CALLSIGN"'
                '>CALLSIGN</a>')
 
-    header = open(config.get("files", "header"), "r")
+    with open(config.get("files", "htmlout"), "w") as html:
 
-    html = open(config.get("files", "htmlout"), "w")
+        with open(config.get("files", "header"), "r") as header:
+        # write out header
+            for line in header.readlines():
+                html.write(line)
 
-    # write out header
-    for line in header.readlines():
-        html.write(line)
-    header.close()
-    html.write("\n")
-    html.write("<P><SMALL>")
-    html.write("Last Updated: ")
-    html.write(ctime())
-    html.write("</SMALL></P>")
-    html.write("\n")
+        html.write("\n")
+        html.write("<P><SMALL>")
+        html.write("Last Updated: ")
+        html.write(ctime())
+        html.write("</SMALL></P>")
+        html.write("\n")
 
-    # write out collected data
-    # for repeater in systems:
-    for repeater in keylist:
-        html.write("<TR>\n")
+        # write out collected data
+        # for repeater in systems:
+        for repeater in keylist:
+            html.write("<TR>\n")
 
-        # callsign
-        html.write(startline)
-        if systems[repeater].callsign.startswith("XRF"):
-            # XRF not handled by ircddb
-            html.write(systems[repeater].callsign)
-        else:
-            html.write(details.replace("CALLSIGN", systems[repeater].callsign))
-        html.write(endline)
-
-        # dashboard status
-        html.write(startline)
-        if systems[repeater].dashboard == "SELF":
-            html.write(broken.replace("BROKEN", "SELF"))
-        elif systems[repeater].dashboard == "OFFLINE":
-            html.write(down)
-        elif systems[repeater].dashboard == "ONLINE":
-            if systems[repeater].ip == "":
-                linked_ip = \
-                    '<a href="http://' + \
-                    systems[repeater].ircddbip + \
-                    '">ONLINE</a>'
+            # callsign
+            html.write(startline)
+            if systems[repeater].callsign.startswith("XRF"):
+                # XRF not handled by ircddb
+                html.write(systems[repeater].callsign)
             else:
-                linked_ip = \
-                    '<a href="http://' + \
-                    systems[repeater].ip + \
-                    '">ONLINE</a>'
-            html.write(up.replace("ONLINE", linked_ip))
-        else:
-            html.write(broken.replace("BROKEN", systems[repeater].dashboard))
-        # ping status
-        html.write(startline)
-        if systems[repeater].pingable == "OFFLINE":
-            html.write(down)
-        elif systems[repeater].pingable == "BROKEN":
-            html.write(broken)
-        elif systems[repeater].pingable == "SELF":
-            html.write(broken.replace("BROKEN", "SELF"))
-        elif systems[repeater].pingable == "ONLINE":
-            html.write(up)
-        else:
-            html.write(broken)
+                html.write(details.replace("CALLSIGN", systems[repeater].callsign))
+            html.write(endline)
 
-        # location
-        html.write(startline)
-        html.write(systems[repeater].location)
-        html.write(endline)
-
-        # IP
-        html.write(startline)
-        if systems[repeater].ip == "":
-            if systems[repeater].in_gwys_file:
-                html.write(broken)
-            else:
-                html.write(broken.replace("BROKEN", "MISSING"))
-        elif (systems[repeater].callsign.startswith("XRF") or
-                (systems[repeater].ip == systems[repeater].ircddbip)):
-                html.write(up.replace("ONLINE", systems[repeater].ip))
-        else:
-            html.write(broken.replace("BROKEN", systems[repeater].ip))
-        html.write(endline)
-
-        # ddns ip
-        html.write(startline)
-        if systems[repeater].callsign.startswith("XRF"):
-            # no ddns yet
-            html.write("[N/A]")
-        else:
-            if systems[repeater].ircddbip == "":
+            # dashboard status
+            html.write(startline)
+            if systems[repeater].dashboard == "SELF":
+                html.write(broken.replace("BROKEN", "SELF"))
+            elif systems[repeater].dashboard == "OFFLINE":
                 html.write(down)
-            elif systems[repeater].ircddbip == systems[repeater].ip:
-                html.write(up.replace("ONLINE", systems[repeater].ircddbip))
+            elif systems[repeater].dashboard == "ONLINE":
+                if systems[repeater].ip == "":
+                    linked_ip = \
+                        '<a href="http://' + \
+                        systems[repeater].ircddbip + \
+                        '">ONLINE</a>'
+                else:
+                    linked_ip = \
+                        '<a href="http://' + \
+                        systems[repeater].ip + \
+                        '">ONLINE</a>'
+                html.write(up.replace("ONLINE", linked_ip))
             else:
-                html.write(broken.replace("BROKEN",
-                                          systems[repeater].ircddbip))
-        html.write(endline)
+                html.write(broken.replace("BROKEN", systems[repeater].dashboard))
+            # ping status
+            html.write(startline)
+            if systems[repeater].pingable == "OFFLINE":
+                html.write(down)
+            elif systems[repeater].pingable == "BROKEN":
+                html.write(broken)
+            elif systems[repeater].pingable == "SELF":
+                html.write(broken.replace("BROKEN", "SELF"))
+            elif systems[repeater].pingable == "ONLINE":
+                html.write(up)
+            else:
+                html.write(broken)
 
-        # detailed web status
-        html.write(startline)
-        html.write(("<a href='https://http.cat/" + systems[repeater].web_status + "'>"
-                    + systems[repeater].web_status + "</a>"))
-        html.write(endline)
+            # location
+            html.write(startline)
+            html.write(systems[repeater].location)
+            html.write(endline)
 
-    # finish up
-    html.write("</TABLE>\n")
-    html.write("</BODY>\n")
-    html.write("</HTML>\n")
-    html.close()
+            # IP
+            html.write(startline)
+            if systems[repeater].ip == "":
+                if systems[repeater].in_gwys_file:
+                    html.write(broken)
+                else:
+                    html.write(broken.replace("BROKEN", "MISSING"))
+            elif (systems[repeater].callsign.startswith("XRF") or
+                    (systems[repeater].ip == systems[repeater].ircddbip)):
+                    html.write(up.replace("ONLINE", systems[repeater].ip))
+            else:
+                html.write(broken.replace("BROKEN", systems[repeater].ip))
+            html.write(endline)
+
+            # ddns ip
+            html.write(startline)
+            if systems[repeater].callsign.startswith("XRF"):
+                # no ddns yet
+                html.write("[N/A]")
+            else:
+                if systems[repeater].ircddbip == "":
+                    html.write(down)
+                elif systems[repeater].ircddbip == systems[repeater].ip:
+                    html.write(up.replace("ONLINE", systems[repeater].ircddbip))
+                else:
+                    html.write(broken.replace("BROKEN",
+                                            systems[repeater].ircddbip))
+            html.write(endline)
+
+            # detailed web status
+            html.write(startline)
+            html.write(("<a href='https://http.cat/"
+                        + systems[repeater].web_status + "'>"
+                        + systems[repeater].web_status + "</a>"))
+            html.write(endline)
+
+        # finish up
+        html.write("</TABLE>\n")
+        html.write("</BODY>\n")
+        html.write("</HTML>\n")
 
 
 def main():
@@ -298,7 +300,7 @@ def main():
 
     # grab our IP so we can know if we're running the script
     # on the same IP as a systems[repeater].and indicate as such
-    myip = get_IP()
+    myip = get_ip()
 
     # remove old gwysfile from previous run and download the latest
     # copy
@@ -306,9 +308,8 @@ def main():
     subprocess.call(["wget", config.get("files", "gwysdownload")])
 
     # read in gateways
-    gwys = open(config.get("files", "gwysfile"), "r")
-    process_gwys_file(gwys, systems)
-    gwys.close()
+    with open(config.get("files", "gwysfile"), "r") as gwys:
+        process_gwys_file(gwys, systems)
 
     # Net operations take time so we're going to have each repeater
     # have it's own worker thread to speed up the process
@@ -346,6 +347,6 @@ if __name__ == "__main__":
 
     configfile = "gwstatus.ini"
 
-    config = readConfigFile(configfile)
+    config = readconfigfile(configfile)
 
     main()
