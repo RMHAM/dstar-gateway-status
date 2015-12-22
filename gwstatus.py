@@ -94,7 +94,8 @@ def process_gwys_file(gwys, systems):
 
 def check_ircddb(systems, repeater):
     """check ircddb status"""
-    if repeater.startswith("XRF"):
+    if (repeater.startswith("XRF")
+        or repeater.startswith("REF")):
         # no ddns yet
         systems[repeater].ircddbip = ""
     else:
@@ -204,8 +205,9 @@ def generate_html(systems):
 
             # callsign
             html.write(startline)
-            if systems[repeater].callsign.startswith("XRF"):
-                # XRF not handled by ircddb
+            if (systems[repeater].callsign.startswith("XRF")
+                or systems[repeater].callsign.startswith("REF")):
+                # XRF & REF not handled by ircddb
                 html.write(systems[repeater].callsign)
             else:
                 html.write(details.replace("CALLSIGN", systems[repeater].callsign))
@@ -256,8 +258,9 @@ def generate_html(systems):
                     html.write(broken)
                 else:
                     html.write(broken.replace("BROKEN", "MISSING"))
-            elif (systems[repeater].callsign.startswith("XRF") or
-                    (systems[repeater].ip == systems[repeater].ircddbip)):
+            elif (systems[repeater].callsign.startswith("XRF")
+                  or systems[repeater].callsign.startswith("REF")
+                  or (systems[repeater].ip == systems[repeater].ircddbip)):
                     html.write(up.replace("ONLINE", systems[repeater].ip))
             else:
                 html.write(broken.replace("BROKEN", systems[repeater].ip))
@@ -265,7 +268,8 @@ def generate_html(systems):
 
             # ddns ip
             html.write(startline)
-            if systems[repeater].callsign.startswith("XRF"):
+            if (systems[repeater].callsign.startswith("XRF")
+                or systems[repeater].callsign.startswith("REF")):
                 # no ddns yet
                 html.write("[N/A]")
             else:
