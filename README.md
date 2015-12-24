@@ -30,6 +30,10 @@ Prerequisites
   1. `sudo yum install python26 python26-httplib2`
   2. edit gwstatus.py and change the first line from "python" to "python26" as shown in the comment.
 
+Installation
+============
+It's recommended that you copy gwstatus.hdr, gwstatus.py, and gwstatus.ini to a new location and execute them from there. Please note that gwstatus.py will retrieve and delete the FREE STAR* gwys.txt file in the working directory so it's best to run this from a user account (i.e. NOT root).
+
 Configuration
 =============
 Edit gwstatus.ini:
