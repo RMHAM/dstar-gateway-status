@@ -1,4 +1,5 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ba02492aeb5041229b85085fdd049e51/badge.svg)](https://www.quantifiedcode.com/app/project/ba02492aeb5041229b85085fdd049e51)
+[![ghit.me](https://ghit.me/badge.svg?repo=RMHAM/dstar-gateway-status)](https://ghit.me/repo/RMHAM/dstar-gateway-status)
 
 Description
 ===========
